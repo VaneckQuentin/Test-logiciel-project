@@ -45,6 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import androidx.test.espresso.DataInteraction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -53,8 +54,11 @@ import androidx.test.runner.AndroidJUnit4;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +67,7 @@ import eu.laramartin.inventorymanager.data.InventoryDbHelper;
 import eu.laramartin.inventorymanager.data.StockContract;
 import eu.laramartin.inventorymanager.data.StockItem;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
@@ -76,19 +81,59 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest {
 
-    @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    @ClassRule
+    public static ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
     //@Rule
     //public ActivityTestRule<DetailsActivity> dActivityTestRule = new ActivityTestRule<>(DetailsActivity.class);
 
+    private static InventoryDbHelper dbHelper;
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        dbHelper = new InventoryDbHelper(mActivityTestRule.getActivity());
+    }
+
+    @Before
+    public void setUpEach() throws Exception {
+        StockItem item = new StockItem(
+                "testItem1".trim(),
+                "10".trim(),
+                Integer.parseInt("10".trim()),
+                "firstSupplierName".trim(),
+                "09900900900".trim(),
+                "firstSupplierName@example.com".trim(),
+                "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+        StockItem item2 = new StockItem(
+                "testItem2".trim(),
+                "20".trim(),
+                Integer.parseInt("20".trim()),
+                "secondSupplierName".trim(),
+                "09900900900".trim(),
+                "secondSupplierName@example.com".trim(),
+                "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+        dbHelper.insertItem(item);
+        dbHelper.insertItem(item2);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        database.delete(StockContract.StockEntry.TABLE_NAME, null, null);
+    }
+
     @Test
-    public void goToDetailsActivityTest() {
+    public void goToDetailsActivityAddNewItemTest() {
+        mActivityTestRule.launchActivity(null);
+
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -102,6 +147,57 @@ public class MainActivityTest {
         ViewInteraction textView2 = onView(
                 allOf(withText("Add new item"), withParent(withId(R.id.action_bar))));
         textView2.check(matches(withText("Add new item")));
+    }
+
+    @Test
+    public void goToDetailsActivityEditItemTest() {
+        mActivityTestRule.launchActivity(null);
+
+        DataInteraction linearLayout = onData(anything())
+                .inAdapterView(allOf(withId(R.id.list_view),
+                        childAtPosition(
+                                withClassName(is("android.widget.RelativeLayout")),
+                                1)))
+                .atPosition(0);
+        linearLayout.perform(click());
+
+        ViewInteraction textView2 = onView(
+                allOf(withText("Edit item"), withParent(withId(R.id.action_bar))));
+        textView2.check(matches(withText("Edit item")));
+    }
+
+    @Test
+    public void decreaseQuantityOnClickCartTest(){
+        mActivityTestRule.launchActivity(null);
+
+        ViewInteraction textView = onView(
+                allOf(withId(R.id.quantity), withText("10"),
+                        childAtPosition(
+                                childAtPosition(
+                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
+                                        1),
+                                2),
+                        isDisplayed()));
+        textView.check(matches(withText("10")));
+
+        DataInteraction appCompatImageView = onData(anything())
+                .inAdapterView(
+                        allOf(withId(R.id.list_view),
+                                childAtPosition(
+                                        withClassName(is("android.widget.RelativeLayout")),
+                                        1)))
+                .atPosition(0).onChildView(withId(R.id.sale));
+        appCompatImageView.perform(click());
+
+        ViewInteraction textView2 = onView(
+                allOf(withId(R.id.quantity), withText("9"),
+                        childAtPosition(
+                                childAtPosition(
+                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
+                                        1),
+                                2),
+                        isDisplayed()));
+        textView2.check(matches(withText("9")));
     }
 
     private static Matcher<View> childAtPosition(
