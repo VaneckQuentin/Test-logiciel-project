@@ -39,5 +39,18 @@
 
 package eu.laramartin.inventorymanager;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 public class DetailsActivityTest {
+
+    @Before
+
+    @After
+
+    @Test
+    public void addition_isCorrect() throws Exception {
+        //assertEquals(4, 2 + 2);
+    }
 }
