@@ -155,6 +155,8 @@ public class DetailsActivityTest {
     public void setUpEach() throws Exception {
         dbHelper.insertItem(item);
         dbHelper.insertItem(item2);
+
+        mActivityTestRule.launchActivity(null);
     }
 
     @After
@@ -169,8 +171,6 @@ public class DetailsActivityTest {
 
     @Test
     public void confirmationDialogOnLeaveCompletedAddActivityButtonPressedDisplayTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -233,8 +233,6 @@ public class DetailsActivityTest {
 
     @Test
     public void confirmationDialogOnLeaveCompletedAddActivityFilledFieldDisplayTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -324,8 +322,6 @@ public class DetailsActivityTest {
 
     @Test
     public void confirmationDialogOnLeaveCompletedAddActivityKeepEditingPressedDisplayTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -384,8 +380,6 @@ public class DetailsActivityTest {
 
     @Test
     public void confirmationDialogOnLeaveCompletedAddActivityDiscardPressedDisplayTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -454,8 +448,6 @@ public class DetailsActivityTest {
      */
     @Test
     public void completeAndAddItemToListTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -576,8 +568,6 @@ public class DetailsActivityTest {
 
     @Test
     public void editItemDecreaseQuantityTest() {
-        mActivityTestRule.launchActivity(null);
-
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
                         childAtPosition(
@@ -618,8 +608,6 @@ public class DetailsActivityTest {
 
     @Test
     public void editItemDecreaseQuantityUnder0Test() {
-        mActivityTestRule.launchActivity(null);
-
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
                         childAtPosition(
@@ -662,8 +650,6 @@ public class DetailsActivityTest {
 
     @Test
     public void editItemIncreaseQuantityTest() {
-        mActivityTestRule.launchActivity(null);
-
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
                         childAtPosition(
@@ -704,8 +690,6 @@ public class DetailsActivityTest {
 
     @Test
     public void validateEditItemChangedQuantityTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction textView = onView(
                 allOf(withId(R.id.quantity), withText("10"),
                         childAtPosition(
@@ -757,8 +741,6 @@ public class DetailsActivityTest {
 
     @Test
     public void discardEditItemChangedQuantityTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction textView = onView(
                 allOf(withId(R.id.quantity), withText("10"),
                         childAtPosition(
@@ -821,8 +803,6 @@ public class DetailsActivityTest {
 
     @Test
     public void editItemDeleteItemTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction textView = onView(
                 allOf(withId(R.id.product_name), withText("testItem1"),
                         childAtPosition(
@@ -870,8 +850,6 @@ public class DetailsActivityTest {
 
     @Test
     public void editItemDeleteAllItemsTest() {
-        mActivityTestRule.launchActivity(null);
-
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
                         childAtPosition(

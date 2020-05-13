@@ -124,6 +124,8 @@ public class MainActivityTest {
     public void setUpEach() throws Exception {
         dbHelper.insertItem(item);
         dbHelper.insertItem(item2);
+
+        mActivityTestRule.launchActivity(null);
     }
 
     @After
@@ -138,8 +140,6 @@ public class MainActivityTest {
 
     @Test
     public void goToDetailsActivityAddNewItemTest() {
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
                         childAtPosition(
@@ -157,8 +157,6 @@ public class MainActivityTest {
 
     @Test
     public void goToDetailsActivityEditItemTest() {
-        mActivityTestRule.launchActivity(null);
-
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
                         childAtPosition(
@@ -174,8 +172,6 @@ public class MainActivityTest {
 
     @Test
     public void decreaseQuantityOnClickCartTest(){
-        mActivityTestRule.launchActivity(null);
-
         ViewInteraction textView = onView(
                 allOf(withId(R.id.quantity), withText("10"),
                         childAtPosition(
