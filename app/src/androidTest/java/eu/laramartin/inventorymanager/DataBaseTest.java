@@ -74,6 +74,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -210,6 +211,67 @@ public class DataBaseTest {
             // Verify
             Integer realCount = cursor.getCount();
             assertEquals(realCount, countNumber);
+
+        } finally {
+
+        }
+    }
+
+    @Test
+    public void readStock_verifyCountStockDifferentAfterAddNewItemTest() {
+        try {
+            //Set up
+            int countNumber = dbHelper.readStock().getCount();
+
+            StockItem item = new StockItem(
+                    "testItem3",
+                    "10 €",
+                    10,
+                    "firstSupplierName",
+                    "09900900900",
+                    "firstSupplierName@example.com",
+                    "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+            dbHelper.insertItem(item);
+
+            // Exercice
+            mActivityTestRule.launchActivity(null);
+            Cursor cursor = dbHelper.readStock();
+
+            // Verify
+            int realCount = cursor.getCount();
+            assertEquals(realCount, countNumber+1);
+
+        } finally {
+
+        }
+    }
+
+    @Test
+    public void readStock_verifyStockDifferentAfterAddNewItemTest() {
+        Integer countNumber = null;
+
+        try {
+            //Set up
+            Cursor cursor1 = dbHelper.readStock();
+
+            StockItem item = new StockItem(
+                    "testItem3",
+                    "10 €",
+                    10,
+                    "firstSupplierName",
+                    "09900900900",
+                    "firstSupplierName@example.com",
+                    "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+            dbHelper.insertItem(item);
+
+            // Exercice
+            mActivityTestRule.launchActivity(null);
+            Cursor cursor2 = dbHelper.readStock();
+
+            // Verify
+            assertNotEquals(cursor1, cursor2);
 
         } finally {
 
@@ -453,7 +515,180 @@ public class DataBaseTest {
         }
     }
 
-    
+    @Test
+    public void sellOneItem_WithExistingIdAndPositiveQuantity() {
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            Cursor cursor = dbHelper.readStock();
+            cursor.moveToPosition(0);
+            long itemId = cursor.getLong(cursor.getColumnIndex(StockContract.StockEntry._ID));
+
+
+
+            cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int cursorQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, cursorQuantity);
+
+            cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(cursorQuantity-1, actualQuantity);
+        } finally {
+
+        }
+    }
+
+    @Test
+    public void sellOneItem_WithExistingIdAndZeroQuantity() {
+        StockItem item = null;
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            item = new StockItem(
+                    "testItem3",
+                    "10 €",
+                    0,
+                    "firstSupplierName",
+                    "09900900900",
+                    "firstSupplierName@example.com",
+                    "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+            dbHelper.insertItem(item);
+
+            Cursor cursor = dbHelper.readStock();
+            cursor.moveToLast();
+            int cursorQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+            long itemId = cursor.getLong(cursor.getColumnIndex(StockContract.StockEntry._ID));
+
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, cursorQuantity);
+
+            cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(cursorQuantity, actualQuantity);
+        } finally {
+
+        }
+    }
+
+    @Test
+    public void sellOneItem_WithExistingIdAndNegativeQuantity() {
+        StockItem item = null;
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            int zeroQuantity = 0;
+
+            item = new StockItem(
+                    "testItem3",
+                    "10 €",
+                    -10,
+                    "firstSupplierName",
+                    "09900900900",
+                    "firstSupplierName@example.com",
+                    "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
+
+            dbHelper.insertItem(item);
+
+            Cursor cursor = dbHelper.readStock();
+            cursor.moveToLast();
+            int cursorQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+            long itemId = cursor.getLong(cursor.getColumnIndex(StockContract.StockEntry._ID));
+
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, cursorQuantity);
+
+            cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(zeroQuantity, actualQuantity);
+        } finally {
+
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void sellOneItem_WithExistingIdAndNullQuantity() {
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            Integer quantity = null;
+
+            Cursor cursor = dbHelper.readStock();
+            cursor.moveToFirst();
+            long itemId = cursor.getLong(cursor.getColumnIndex(StockContract.StockEntry._ID));
+
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, quantity);
+
+            cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            Integer actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(quantity, actualQuantity);
+        } finally {
+
+        }
+    }
+
+    @Test(expected = CursorIndexOutOfBoundsException.class)
+    public void sellOneItem_WithNotExistingIdAndPositiveQuantity() {
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            int quantity = 15;
+            long itemId = -1;
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, quantity);
+
+            Cursor cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(quantity-1, actualQuantity);
+        } finally {
+
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void sellOneItem_WithNullIdAndPositiveQuantity() {
+        try {
+            //Set up
+            mActivityTestRule.launchActivity(null);
+
+            int quantity = 15;
+            Long itemId = null;
+
+            // Exercice
+            dbHelper.sellOneItem(itemId, quantity);
+
+            Cursor cursor = dbHelper.readItem(itemId);
+            cursor.moveToFirst();
+            int actualQuantity = Integer.valueOf(cursor.getString(cursor.getColumnIndex(StockContract.StockEntry.COLUMN_QUANTITY)));
+
+            assertEquals(quantity-1, actualQuantity);
+        } finally {
+
+        }
+    }
 
     private void assertCursor(Cursor cursor, StockItem item) {
         cursor.moveToFirst();
