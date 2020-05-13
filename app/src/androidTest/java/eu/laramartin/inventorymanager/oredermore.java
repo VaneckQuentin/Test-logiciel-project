@@ -40,7 +40,6 @@
 package eu.laramartin.inventorymanager;
 
 
-import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -54,31 +53,20 @@ import androidx.test.runner.AndroidJUnit4;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import eu.laramartin.inventorymanager.data.InventoryDbHelper;
-import eu.laramartin.inventorymanager.data.StockContract;
-import eu.laramartin.inventorymanager.data.StockItem;
-
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anything;
@@ -86,78 +74,22 @@ import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class MainActivityTest {
+public class oredermore {
 
-    @ClassRule
-    public static ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
-    //@Rule
-    //public ActivityTestRule<DetailsActivity> dActivityTestRule = new ActivityTestRule<>(DetailsActivity.class);
-
-    private static InventoryDbHelper dbHelper;
-
-    private StockItem item = new StockItem(
-            "testItem1".trim(),
-            "10".trim(),
-            Integer.parseInt("10".trim()),
-            "firstSupplierName".trim(),
-            "09900900900".trim(),
-            "firstSupplierName@example.com".trim(),
-            "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
-
-    private StockItem item2 = new StockItem(
-            "testItem2".trim(),
-            "20".trim(),
-            Integer.parseInt("20".trim()),
-            "secondSupplierName".trim(),
-            "09900900900".trim(),
-            "secondSupplierName@example.com".trim(),
-            "https://dev.laromana-fils.be/wp-content/uploads/2018/01/Test-Logo-Small-Black-transparent-1.png");
-
-    @BeforeClass
-    public static void setUp() throws Exception {
-        dbHelper = new InventoryDbHelper(mActivityTestRule.getActivity());
-
-        resetDB();
-    }
-
-    @Before
-    public void setUpEach() throws Exception {
-        dbHelper.insertItem(item);
-        dbHelper.insertItem(item2);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        resetDB();
-    }
-
-    private static void resetDB(){
-        SQLiteDatabase database = dbHelper.getWritableDatabase();
-        database.delete(StockContract.StockEntry.TABLE_NAME, null, null);
-    }
+    @Rule
+    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void goToDetailsActivityAddNewItemTest() {
-        mActivityTestRule.launchActivity(null);
-
-        ViewInteraction floatingActionButton = onView(
-                allOf(withId(R.id.fab),
+    public void oredermore() {
+        ViewInteraction actionMenuItemView = onView(
+                allOf(withId(R.id.action_add_dummy_data), withContentDescription("Add Dummy Data"),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(android.R.id.content),
-                                        0),
-                                2),
+                                        withId(R.id.action_bar),
+                                        1),
+                                0),
                         isDisplayed()));
-        floatingActionButton.perform(click());
-
-        ViewInteraction textView2 = onView(
-                allOf(withText("Add new item"), withParent(withId(R.id.action_bar))));
-        textView2.check(matches(withText("Add new item")));
-    }
-
-    @Test
-    public void goToDetailsActivityEditItemTest() {
-        mActivityTestRule.launchActivity(null);
+        actionMenuItemView.perform(click());
 
         DataInteraction linearLayout = onData(anything())
                 .inAdapterView(allOf(withId(R.id.list_view),
@@ -167,43 +99,39 @@ public class MainActivityTest {
                 .atPosition(0);
         linearLayout.perform(click());
 
-        ViewInteraction textView2 = onView(
-                allOf(withText("Edit item"), withParent(withId(R.id.action_bar))));
-        textView2.check(matches(withText("Edit item")));
-    }
-
-    @Test
-    public void decreaseQuantityOnClickCartTest(){
-        mActivityTestRule.launchActivity(null);
-
-        ViewInteraction textView = onView(
-                allOf(withId(R.id.quantity), withText("10"),
+        ViewInteraction appCompatImageButton = onView(
+                allOf(withId(R.id.increase_quantity),
                         childAtPosition(
                                 childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        1),
-                                2),
-                        isDisplayed()));
-        textView.check(matches(withText("10")));
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        5),
+                                2)));
+        appCompatImageButton.perform(scrollTo(), click());
 
-        DataInteraction appCompatImageView = onData(anything())
-                .inAdapterView(
-                        allOf(withId(R.id.list_view),
-                                childAtPosition(
-                                        withClassName(is("android.widget.RelativeLayout")),
-                                        1)))
-                .atPosition(0).onChildView(withId(R.id.sale));
-        appCompatImageView.perform(click());
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
 
-        ViewInteraction textView2 = onView(
-                allOf(withId(R.id.quantity), withText("9"),
+        ViewInteraction appCompatTextView = onView(
+                allOf(withId(R.id.title), withText("Order more"),
                         childAtPosition(
                                 childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        1),
+                                        withClassName(is("android.support.v7.view.menu.ListMenuItemView")),
+                                        0),
+                                0),
+                        isDisplayed()));
+        appCompatTextView.perform(click());
+
+        ViewInteraction appCompatButton = onView(
+                allOf(withId(android.R.id.button2), withText("E-mail"),
+                        childAtPosition(
+                                allOf(withId(R.id.buttonPanel),
+                                        childAtPosition(
+                                                withId(R.id.parentPanel),
+                                                3)),
                                 2),
                         isDisplayed()));
-        textView2.check(matches(withText("9")));
+        appCompatButton.perform(click());
+
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
     }
 
     private static Matcher<View> childAtPosition(
